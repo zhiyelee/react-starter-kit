@@ -3,13 +3,13 @@
 
 # TEAM
 
-    <name> -- <role> -- <twitter>
+    Konstantin Tarkus -- @koistya
 
 # THANKS
 
-    <name>
+    Daniel Sont -- github.com/metagen
 
 # TECHNOLOGY COLOPHON
 
     HTML5, CSS3, JavaScript
-    React, React-Router, Bootstrap
+    React, Director, Bootstrap
