@@ -105,6 +105,29 @@ gulp.task('images', function() {
     .pipe($.size({title: 'images'}));
 });
 
+// Generate /api/*.json files
+gulp.task('data', function() {
+  src.data = 'data/**/*.jade';
+
+  var through = require('through2');
+  var jade = require('jade');
+  var assign = require('react/lib/Object.assign');
+
+  return gulp.src(src.data)
+    .pipe($.frontMatter({property: 'metadata', remove: true}))
+    .pipe($.rename({extname: '.json'}))
+    .pipe(through.obj(function(file, enc, cb) {
+      console.assert(file.isBuffer());
+      var json = JSON.stringify(assign({}, file.metadata, {
+        html: jade.render(file.contents.toString(enc))
+      }), null, '  ');
+      file.contents = new Buffer(json, enc);
+      return cb(null, file);
+    }))
+    .pipe(gulp.dest(DEST + '/api'))
+    .pipe($.size({title: 'data'}));
+});
+
 // HTML pages
 gulp.task('pages', function() {
   src.pages = ['src/components/pages/**/*.js', 'src/components/pages/404.html'];
@@ -188,7 +211,7 @@ gulp.task('bundle', function(cb) {
 
 // Build the app from source code
 gulp.task('build', ['clean'], function(cb) {
-  runSequence(['vendor', 'assets', 'images', 'pages', 'styles', 'bundle'], cb);
+  runSequence(['vendor', 'assets', 'images', 'pages', 'styles', 'data', 'bundle'], cb);
 });
 
 // Launch a lightweight HTTP Server
@@ -229,6 +252,7 @@ gulp.task('serve', function(cb) {
     gulp.watch(src.images, ['images']);
     gulp.watch(src.pages, ['pages']);
     gulp.watch(src.styles, ['styles']);
+    gulp.watch(src.data, ['data']);
     gulp.watch(DEST + '/**/*.*', function(file) {
       browserSync.reload(path.relative(__dirname, file.path));
     });
